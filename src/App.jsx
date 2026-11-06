@@ -10,23 +10,23 @@ function App() {
   const [progetti, setProgetti] = useState([])
 
   useEffect(() => {
-    // Fetch info Chi Sono
-    fetch('http://127.0.0.1:8000/api/about')
-      .then((res) => res.json())
-      .then((data) => setAbout(data))
-      .catch((err) => console.error("Errore about:", err))
+  // Fetch info Chi Sono
+  fetch('https://gabriele-backend.onrender.com/api/about')
+    .then((res) => res.json())
+    .then((data) => setAbout(data))
+    .catch((err) => console.error("Errore about:", err))
 
-    // Fetch Skills
-    fetch('http://127.0.0.1:8000/api/skills')
-      .then((res) => res.json())
-      .then((data) => setSkills(data))
-      .catch((err) => console.error("Errore skills:", err))
+  // Fetch Skills
+  fetch('https://gabriele-backend.onrender.com/api/skills')
+    .then((res) => res.json())
+    .then((data) => setSkills(data))
+    .catch((err) => console.error("Errore skills:", err))
 
-    // Fetch Progetti
-    fetch('http://127.0.0.1:8000/api/projects')
-      .then((res) => res.json())
-      .then((data) => setProgetti(data))
-      .catch((err) => console.error("Errore progetti:", err))
+  // Fetch Progetti
+  fetch('https://gabriele-backend.onrender.com/api/projects')
+    .then((res) => res.json())
+    .then((data) => setProgetti(data))
+    .catch((err) => console.error("Errore progetti:", err))
   }, [])
 
   return (
