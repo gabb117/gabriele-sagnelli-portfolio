@@ -18,7 +18,7 @@ function App() {
     const fetchAllData = async () => {
       // 1. Definiamo un tempo minimo di attesa (es. 2500 millisecondi = 2.5 secondi)
       // così il minigioco rimane attivo il tempo giusto per fare una partita.
-      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2500));
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 25000));
 
       try {
         // 2. Eseguiamo contemporaneamente la chiamata di rete e il timer minimo
