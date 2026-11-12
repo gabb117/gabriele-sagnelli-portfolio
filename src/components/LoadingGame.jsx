@@ -1,12 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function LoadingGame({ onLoaded }) {
   const [gameState, setGameState] = useState('START'); // 'START', 'PLAYING', 'GAMEOVER'
   const [isJumping, setIsJumping] = useState(false);
   const [score, setScore] = useState(0);
-  const [obstaclePosition, setObstaclePosition] = useState(430); // Posizione iniziale fuori schermo a destra
 
-  // Gestione globale della barra spaziatrice o del click
+  // Usiamo i ref per mantenere i valori di gioco aggiornati in tempo reale senza lag di re-render
+  const obstacleXRef = useRef(400);
+  const isJumpingRef = useRef(false);
+  const gameStateRef = useRef('START');
+  
+  // Sincronizziamo i ref con gli stati
+  gameStateRef.current = gameState;
+  isJumpingRef.current = isJumping;
+
+  // Riferimenti agli elementi DOM per muoverli direttamente via CSS transform (fluidissimo)
+  const obstacleRef = useRef(null);
+  const developerRef = useRef(null);
+
+  // Gestione tastiera (Barra Spazio)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === 'Space' || e.key === ' ') {
@@ -16,62 +28,66 @@ export default function LoadingGame({ onLoaded }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, isJumping]);
+  }, []);
 
   const handleAction = () => {
-    if (gameState === 'START') {
+    if (gameStateRef.current === 'START') {
       setGameState('PLAYING');
       setScore(0);
-    } else if (gameState === 'PLAYING') {
+      obstacleXRef.current = 400;
+    } else if (gameStateRef.current === 'PLAYING') {
       triggerJump();
-    } else if (gameState === 'GAMEOVER') {
-      // Riavvia il gioco da capo
+    } else if (gameStateRef.current === 'GAMEOVER') {
       setGameState('PLAYING');
       setScore(0);
+      obstacleXRef.current = 400;
     }
   };
 
   const triggerJump = () => {
-    if (!isJumping) {
+    if (!isJumpingRef.current) {
       setIsJumping(true);
-      setTimeout(() => setIsJumping(false), 400); // Durata del salto
+      setTimeout(() => {
+        setIsJumping(false);
+      }, 450); // Durata del salto
     }
   };
 
-  // Loop di gioco: muove l'ostacolo e gestisce la collisione
+  // Loop principale di gioco con requestAnimationFrame
   useEffect(() => {
-    if (gameState !== 'PLAYING') return;
-
     let animationFrameId;
-    let currentPos = 430;
-    const speed = 5; // Velocità dell'ostacolo
+    let currentScore = 0;
 
-    const updateGame = () => {
-      currentPos -= speed;
-      
-      // Se l'ostacolo esce dallo schermo a sinistra, lo riposiziona a destra e aumenta il punteggio
-      if (currentPos < -30) {
-        currentPos = 430;
-        setScore((prev) => prev + 10);
+    const gameLoop = () => {
+      if (gameStateRef.current === 'PLAYING') {
+        // Muove l'ostacolo verso sinistra
+        obstacleXRef.current -= 6; // Velocità del bug
+
+        // Se esce dallo schermo a sinistra, lo riporta a destra e incrementa il punteggio
+        if (obstacleXRef.current < -30) {
+          obstacleXRef.current = 400;
+          currentScore += 10;
+          setScore(currentScore);
+        }
+
+        // Aggiorna la posizione dell'ostacolo direttamente nel DOM (zero lag)
+        if (obstacleRef.current) {
+          obstacleRef.current.style.transform = `translateX(${obstacleXRef.current}px)`;
+        }
+
+        // Controllo collisione (Developer si trova a circa 50px da sinistra, larghezza ~30px)
+        // L'ostacolo parte da 400px e si sposta a sinistra. Quando è tra 30px e 75px, controlliamo il salto.
+        if (obstacleXRef.current > 30 && obstacleXRef.current < 75 && !isJumpingRef.current) {
+          setGameState('GAMEOVER');
+        }
       }
 
-      setObstaclePosition(currentPos);
-
-      // Controllo collisione (Hitbox approssimativa)
-      // Il developer è fisso a left: 50px (area da 50 a ~80px)
-      // L'ostacolo si trova a 'currentPos' (area da currentPos a currentPos + 30px)
-      if (currentPos > 40 && currentPos < 80 && !isJumping) {
-        // Collisione avvenuta! Game Over
-        setGameState('GAMEOVER');
-        return;
-      }
-
-      animationFrameId = requestAnimationFrame(updateGame);
+      animationFrameId = requestAnimationFrame(gameLoop);
     };
 
-    animationFrameId = requestAnimationFrame(updateGame);
+    animationFrameId = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [gameState, isJumping]);
+  }, []);
 
   return (
     <div 
@@ -90,15 +106,15 @@ export default function LoadingGame({ onLoaded }) {
       }}
     >
       {/* Intestazione e Punteggio */}
-      <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+      <div style={{ marginBottom: '1.5rem', textAlign: 'center', height: '30px' }}>
         {gameState === 'START' && (
-          <h2 style={{ color: '#646cff', fontSize: '1.5rem' }}>Pronto a saltare i bug del server?</h2>
+          <h2 style={{ color: '#646cff', fontSize: '1.3rem', margin: 0 }}>Pronto a saltare i bug del server?</h2>
         )}
         {gameState === 'PLAYING' && (
           <div style={{ fontSize: '1.3rem', color: '#646cff' }}>Punteggio: {score}</div>
         )}
         {gameState === 'GAMEOVER' && (
-          <div style={{ fontSize: '1.4rem', color: '#ff6b6b' }}>💥 CRASH! Bug non evitato. (Punteggio finale: {score})</div>
+          <div style={{ fontSize: '1.3rem', color: '#ff6b6b' }}>💥 CRASH! Bug colpito. (Punteggio: {score})</div>
         )}
       </div>
       
@@ -107,7 +123,7 @@ export default function LoadingGame({ onLoaded }) {
         position: 'relative',
         width: '400px',
         height: '150px',
-        borderBottom: '2px solid #333',
+        borderBottom: '2px solid #444',
         background: '#1a1a1a',
         borderRadius: '8px',
         overflow: 'hidden',
@@ -115,7 +131,7 @@ export default function LoadingGame({ onLoaded }) {
         alignItems: 'flex-end',
         paddingBottom: '5px'
       }}>
-        {/* Schermata iniziale / Overlay */}
+        {/* Schermata iniziale */}
         {gameState === 'START' && (
           <div style={{
             position: 'absolute',
@@ -126,14 +142,15 @@ export default function LoadingGame({ onLoaded }) {
             alignItems: 'center',
             textAlign: 'center',
             padding: '1rem',
-            fontSize: '1rem',
-            color: '#aaa'
+            fontSize: '0.95rem',
+            color: '#aaa',
+            zIndex: 10
           }}>
-            Premi <strong>SPAZIO</strong> o <strong>Clicca qui</strong> per avviare il minigioco di attesa!
+            Premi <strong>SPAZIO</strong> o <strong>Clicca</strong> per avviare il gioco!
           </div>
         )}
 
-        {/* Schermata Game Over / Overlay */}
+        {/* Schermata Game Over */}
         {gameState === 'GAMEOVER' && (
           <div style={{
             position: 'absolute',
@@ -145,55 +162,67 @@ export default function LoadingGame({ onLoaded }) {
             alignItems: 'center',
             textAlign: 'center',
             padding: '1rem',
-            color: '#fff'
+            color: '#fff',
+            zIndex: 10
           }}>
-            <p style={{ color: '#ff6b6b', fontWeight: 'bold', marginBottom: '0.5rem' }}>GAME OVER</p>
-            <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>Premi <strong>SPAZIO</strong> per riprovare</p>
+            <p style={{ color: '#ff6b6b', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>GAME OVER</p>
+            <p style={{ fontSize: '0.85rem', opacity: 0.8, margin: 0 }}>Premi <strong>SPAZIO</strong> per riprovare</p>
           </div>
         )}
 
         {/* Il personaggio (Developer) */}
-        <div style={{
-          position: 'absolute',
-          left: '50px',
-          bottom: isJumping ? '75px' : '5px',
-          transition: isJumping ? 'bottom 0.15s ease-out' : 'bottom 0.15s ease-in',
-          fontSize: '2rem'
-        }}>
+        <div 
+          ref={developerRef}
+          style={{
+            position: 'absolute',
+            left: '50px',
+            bottom: isJumping ? '75px' : '5px',
+            transition: isJumping ? 'bottom 0.18s cubic-bezier(0,0,0.2,1)' : 'bottom 0.18s cubic-bezier(0.4,0,1,1)',
+            fontSize: '2rem',
+            zIndex: 2
+          }}
+        >
           👨‍💻
         </div>
 
-        {/* L'ostacolo (Il Bug) */}
-        <div style={{
-          position: 'absolute',
-          left: `${obstaclePosition}px`,
-          bottom: '5px',
-          fontSize: '1.5rem'
-        }}>
+        {/* L'ostacolo (Il Bug) - Muove in modo fluido tramite transform */}
+        <div 
+          ref={obstacleRef}
+          style={{
+            position: 'absolute',
+            left: 0,
+            bottom: '5px',
+            fontSize: '1.5rem',
+            transform: 'translateX(400px)',
+            zIndex: 2
+          }}
+        >
           🐛
         </div>
       </div>
 
-      <p style={{ marginTop: '1.5rem', fontSize: '0.9rem', opacity: 0.6 }}>
+      <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', opacity: 0.6 }}>
         {gameState === 'GAMEOVER' ? 'Premi Spazio per ricominciare' : 'Usa la barra SPAZIO o il MOUSE per saltare'}
       </p>
 
-      {/* Pulsante opzionale per saltare il gioco se i dati sono pronti */}
-      <button 
-        onClick={(e) => { e.stopPropagation(); onLoaded(); }}
-        style={{
-          marginTop: '2rem',
-          background: 'transparent',
-          border: '1px solid #444',
-          color: '#888',
-          padding: '0.5rem 1rem',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '0.8rem'
-        }}
-      >
-        Salta minigioco ed entra nel portfolio &rarr;
-      </button>
+      {/* Pulsante per saltare il gioco ed entrare */}
+      {onLoaded && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); onLoaded(); }}
+          style={{
+            marginTop: '1.5rem',
+            background: 'transparent',
+            border: '1px solid #444',
+            color: '#888',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '0.75rem'
+          }}
+        >
+          Salta minigioco ed entra nel portfolio &rarr;
+        </button>
+      )}
     </div>
   );
 }
