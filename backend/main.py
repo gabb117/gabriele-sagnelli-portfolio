@@ -18,7 +18,7 @@ def get_about():
         "nome": "Gabriele Sagnelli",
         "ruolo": "Python Developer & Data Engineering Enthusiast",
         "bio": "Laureato in Scienze e Tecnologie Informatiche, con una forte passione per lo sviluppo software e l'ingegneria dei dati.",
-        "location": "Italia",
+        "location": "Roma, Italia",
         "esperienza": "Creazione di pipeline ETL, Dashboard interattive e Data Warehouse per Business Intelligence. "
     }
 
