@@ -1,5 +1,5 @@
 export default function Hero({ aboutData }) {
-  if (!aboutdata) return null;
+  if (!aboutData) return null;
 
   return (
     <section id="hero" style={{ padding: '4rem 10%', textAlign: 'center' }}>
