@@ -5,6 +5,7 @@ export default function Navbar() {
       <div style={{ display: 'flex', gap: '1.5rem' }}>
         <a href="#hero" style={{ color: '#fff', textDecoration: 'none' }}>Chi Sono</a>
         <a href="#skills" style={{ color: '#fff', textDecoration: 'none' }}>Skills</a>
+        <a href="#progetti" style={{ color: '#fff', textDecoration: 'none' }}>Progetti</a>
       </div>
     </nav>
   )
