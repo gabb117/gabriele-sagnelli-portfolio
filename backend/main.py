@@ -16,7 +16,7 @@ app.add_middleware(
 def get_about():
     return {
         "nome": "Gabriele Sagnelli",
-        "ruolo": "\nPython Developer & Data Engineering Enthusiast",
+        "ruolo": "Python Developer & Data Engineering Enthusiast",
         "bio": "Laureato in Scienze e Tecnologie Informatiche, con una forte passione per lo sviluppo software e l'ingegneria dei dati.",
         "location": "Italia",
         "esperienza": "Creazione di pipeline ETL, Dashboard interattive e Data Warehouse per Business Intelligence. "

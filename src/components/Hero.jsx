@@ -3,7 +3,7 @@ export default function Hero({ aboutData }) {
 
   return (
     <section id="hero" style={{ padding: '4rem 10%', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '3rem', margin: '0 0 0.5rem 0', color: 'var(--text-h)' }}>
+      <h1 style={{ fontSize: '3rem', margin: '0 0 2.5rem 0', color: 'var(--text-h)' }}>
         Ciao, sono <span style={{ color: 'var(--accent)' }}>{aboutData.nome}</span>
       </h1>
       <h3 style={{ color: 'var(--text)', margin: '0 0 1.5rem 0', fontWeight: '400' }}>
