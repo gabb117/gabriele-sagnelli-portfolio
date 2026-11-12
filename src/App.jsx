@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Skills from './components/Skills'
+import LoadingGame from './components/LoadingGame'
 import './App.css'
 
 const API_BASE_URL = 'https://gabriele-backend.onrender.com/api'
@@ -10,17 +11,23 @@ function App() {
   const [about, setAbout] = useState(null)
   const [skills, setSkills] = useState([])
   const [progetti, setProgetti] = useState([])
-  const [loading, setLoading] = useState(true)// da mostrare ad apertura pagina
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchAllData = async () => {
+      // 1. Definiamo un tempo minimo di attesa (es. 2500 millisecondi = 2.5 secondi)
+      // così il minigioco rimane attivo il tempo giusto per fare una partita.
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2500));
+
       try {
+        // 2. Eseguiamo contemporaneamente la chiamata di rete e il timer minimo
         const [aboutRes, skillsRes, projectsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/about`),
           fetch(`${API_BASE_URL}/skills`),
-          fetch(`${API_BASE_URL}/projects`)
-        ])
+          fetch(`${API_BASE_URL}/projects`),
+          minLoadingTime // <--- Aspetta che scadano almeno i 2.5 secondi
+        ]);
 
         if (!aboutRes.ok || !skillsRes.ok || !projectsRes.ok) {
           throw new Error('Errore nel recupero dei dati dal server')
@@ -43,15 +50,13 @@ function App() {
       }
     }
 
-fetchAllData()
+
+    fetchAllData()
   }, [])
 
+  // Se sta caricando, mostra il minigioco interattivo
   if (loading) {
-    return (
-      <div style={{ background: '#121212', color: '#fff', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '0 1rem' }}>
-        <p>Caricamento portfolio in corso... (il server su Render potrebbe impiegare qualche secondo ad avviarsi)</p>
-      </div>
-    )
+    return <LoadingGame />
   }
 
   if (error) {
