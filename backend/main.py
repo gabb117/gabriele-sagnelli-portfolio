@@ -20,9 +20,9 @@ def get_about():
 @app.get("/api/skills")
 def get_skills():
     return [
-        {"categoria": "Backend", "lista": ["Python", "FastAPI", "REST API", "SQLAlchemy"]},
-        {"categoria": "Frontend", "lista": ["React", "Vite", "JavaScript (ES6+)", "HTML5 & CSS3"]},
-        {"categoria": "Strumenti & DevOps", "lista": ["Git & GitHub", "VS Code", "Uvicorn", "npm"]}
+        {"categoria": "Linguaggi di Programmazione", "lista": ["Python", "C/C++", "Java", "HTML/CSS/JS"]},
+        {"categoria": "Database", "lista": ["MySQL", "SQLite", "PostgresSQL"]},
+        {"categoria": "Strumenti, Librerie e Framework", "lista": ["Git & GitHub", "VS Code", "Pandas", "Numpy", "Plotly", "Streamlit"]}
     ]
 
 
@@ -30,8 +30,8 @@ def get_skills():
 def get_project():
     projects = [{
         "id" : "A1",
-        "title" : "My new project",
-        "descr" : "My Portfolio, frontend: React and backend: FastAPI",
+        "title" : "My Portfolio",
+        "descr" : "My Portfolio: Python & SQL",
         "link" : "http://github.com"
     }] 
      

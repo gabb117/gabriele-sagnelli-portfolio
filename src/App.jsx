@@ -5,7 +5,7 @@ import Skills from './components/Skills'
 import './App.css'
 
 function App() {
-  const [about, setAbout] = useState(null)
+  const [about, setAbout] = useState([])
   const [skills, setSkills] = useState([])
   const [progetti, setProgetti] = useState([])
 
